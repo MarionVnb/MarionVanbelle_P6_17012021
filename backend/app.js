@@ -1,20 +1,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const mongoSanitize = require('express-mongo-sanitize');
+const dotenv = require('dotenv').config()
 const path = require('path');
 
-
-const sauceRoutes = require('./routes/sauce');
-const userRoutes = require('./routes/user');
-
 //connexion à la base de données Mongoose
-mongoose.connect('mongodb+srv://MarionVanbelle:Mv270689@cluster0.f7zyd.mongodb.net/Cluster0?retryWrites=true&w=majority',
+const connectMongoDB = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.f7zyd.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+mongoose.connect(connectMongoDB,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-const app = express();
+const app = express(); 
+
+const sauceRoutes = require('./routes/sauce');
+const userRoutes = require('./routes/user');
 
 // middleware pour la gestion des erreurs CORS
 app.use((req, res, next) => {
@@ -25,6 +27,12 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+// To remove data, use:
+app.use(mongoSanitize());
+// Or, to replace prohibited characters with _, use:
+app.use(mongoSanitize({
+  replaceWith: '_'
+}));
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 

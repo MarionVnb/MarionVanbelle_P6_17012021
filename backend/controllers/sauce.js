@@ -14,7 +14,7 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-  const sauceObject = req.file ? {//opérateur ternaire : req.file existe ou non 
+  const sauceObject = req.file ? {//opérateur ternaire : on vérifie si req.file existe ou non 
     ...JSON.parse(req.body.sauce),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     } : { ...req.body }; //si non, copie de req.body
@@ -50,17 +50,17 @@ exports.likeSauce = (req, res, next) => {
       } else if (like == -1) {
         sauce.usersDisliked.push(userId) //Ajout au tableau usersDisliked
         sauce.dislikes++
-      } else if (like == 0 && sauce.usersLiked.includes(userId)) { //On vérifie si l'id user est présent
+      } else if (like == 0 && sauce.usersLiked.includes(userId)) { //On vérifie si l'id user est présent avec includes()
         sauce.likes--
-        let pos = sauce.usersLiked.indexOf(userId) //On récupère l'index du userId ciblé
-        sauce.usersLiked.splice(pos, 1) //On supprime l'ancien userId
+        let position = sauce.usersLiked.indexOf(userId) // la méthde indexOf() renvoie le premier indice pour lequel on trouve un élément donné dans le tableau - si pas ds le tableau la méthode renvoie -1On récupère l'index du userId ciblé
+        sauce.usersLiked.splice(position, 1) //On supprime l'ancien userId
       } else if (like == 0 && sauce.usersDisliked.includes(userId)) {
         sauce.dislikes--
-        let pos = sauce.usersDisliked.indexOf(userId)
-        sauce.usersDisliked.splice(pos, 1)
+        let position = sauce.usersDisliked.indexOf(userId)
+        sauce.usersDisliked.splice(position, 1)
       }
       Sauce.updateOne({ _id: req.params.id }, { usersLiked: sauce.usersLiked, usersDisliked: sauce.usersDisliked, dislikes: sauce.dislikes, likes: sauce.likes, _id: req.params.id }) //On update notre sauce
-          .then(() => res.status(200).json({ message: 'Objet modifié !' })) //Retour de notre promesse
+          .then(() => res.status(200).json({ message: 'Sauce modifiée !' })) //Retour de notre promesse
           .catch(error => res.status(400).json({ error })); 
      })
      .catch(error => res.status(400).json({ error })); 
